@@ -1,4 +1,4 @@
-from runtime.nutterfixture import NutterFixture, tag
+from runtime.nutterfixture import NutterFixture
 class CovidData(NutterFixture):
     
     def before_all(self):
