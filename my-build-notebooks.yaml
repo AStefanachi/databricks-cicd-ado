@@ -47,7 +47,7 @@ stages:
                   inputs:
                     testResultsFormat: "JUnit"
                     testResultsFiles: "**/test-*.xml"
-                    testRunTitle: "Publish Nutter results"
+                    testRunTitle: "Publish Test results - databricks-cicd-ado"
                   condition: succeededOrFailed()
 
                 - script: databricks workspace delete -r /tmp_nutter_test
