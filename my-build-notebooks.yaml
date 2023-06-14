@@ -32,7 +32,7 @@ stages:
                   persistCredentials: true
                   clean: true
 
-                - script: databricks workspace import_dir -o $(Build.Repository.LocalPath)/workspace-control /tmp_nutter_test
+                - script: databricks workspace import_dir -o $(Build.Repository.LocalPath) /tmp_nutter_test
                   displayName: "Import notebooks in the workspace for testing purposes"
 
                 - script: |
@@ -53,9 +53,9 @@ stages:
                 - script: databricks workspace delete -r /tmp_nutter_test
                   displayName: "Delete /tmp_nutter_test in the workspace"
 
-                - script: "cp -r $(Build.Repository.LocalPath)/workspace-control $(Build.ArtifactStagingDirectory)/workspace-control"
+                - script: "cp -r $(Build.Repository.LocalPath) $(Build.ArtifactStagingDirectory)"
                   displayName: "Copy workspace-control to Artifact Staging Directory"
 
                 - publish: "$(build.ArtifactStagingDirectory)"
-                  artifact: "Databricks"
+                  artifact: "dbr-cicd-ado"
                   displayName: "Publish Databricks Artifact"
