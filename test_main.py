@@ -1,3 +1,5 @@
+# Databricks notebook source
+# DBTITLE 1, Nutter test fixtures
 from runtime.nutterfixture import NutterFixture
 class CovidData(NutterFixture):
     
@@ -12,8 +14,9 @@ class CovidData(NutterFixture):
     # def assertion_your_assertion(self):
     #     # your code
     #     assert (your_assertion_condition)
-
+# COMMAND ----------
+# DBTITLE 1, Execute the tests and print the results
 result = CovidData().execute_tests()
 print(result.to_string())
-# Comment out the next line (result.exit(dbutils)) to see the test result report from within the notebook
+# COMMAND ----------
 result.exit(dbutils)    

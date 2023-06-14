@@ -6,6 +6,9 @@ pdf = pd.read_csv('https://pandemicdatalake.blob.core.windows.net/public/curated
 # DBTITLE 1,From pandas dataframe create a spark dataframe
 sdf = spark.createDataFrame(pdf)
 # COMMAND ----------
+# DBTITLE 1,Limit the selection to only 100 rows for simplicity
+sdf = sdf.limit(100)
+# COMMAND ----------
 # DBTITLE 1,Crate schema if it doesn't exists
 spark.sql("CREATE SCHEMA IF NOT EXISTS covid")
 # COMMAND ----------
