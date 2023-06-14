@@ -1,0 +1,61 @@
+parameters:
+  - name: stageName
+    type: string
+    default: "dev"
+
+stages:
+  - stage: ${{ parameters.stageName }}
+    variables:
+      - group: ${{ parameters.stageName }}
+    jobs:
+      - deployment: ${{ parameters.stageName }}
+        environment: "${{ parameters.stageName }}"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: pip install databricks-cli nutter
+                  displayName: "Install python libraries"
+
+                - script: echo $(databricksToken) > token-file
+                  displayName: "Create token file"
+
+                - script: databricks configure --host $(databricksHost) --token-file token-file
+                  displayName: "Configure databricks-cli"
+
+                - script: rm token-file
+                  displayName: "Remove token file"
+
+                  # Download the files from the designated branch in the Git remote repository
+                  # onto the build agent.
+                - checkout: self
+                  persistCredentials: true
+                  clean: true
+
+                - script: databricks workspace import_dir -o $(Build.Repository.LocalPath)/workspace-control /tmp_nutter_test
+                  displayName: "Import notebooks in the workspace for testing purposes"
+
+                - script: |
+                    nutter run /tmp_nutter_test/* $CLUSTER --junit_report --recursive
+                  displayName: "Execute nutter tests"
+                  env:
+                    CLUSTER: $(databricksCluster)
+                    DATABRICKS_HOST: $(databricksHost)
+                    DATABRICKS_TOKEN: $(databricksToken)
+
+                - task: PublishTestResults@2
+                  inputs:
+                    testResultsFormat: "JUnit"
+                    testResultsFiles: "**/test-*.xml"
+                    testRunTitle: "Publish Nutter results"
+                  condition: succeededOrFailed()
+
+                - script: databricks workspace delete -r /tmp_nutter_test
+                  displayName: "Delete /tmp_nutter_test in the workspace"
+
+                - script: "cp -r $(Build.Repository.LocalPath)/workspace-control $(Build.ArtifactStagingDirectory)/workspace-control"
+                  displayName: "Copy workspace-control to Artifact Staging Directory"
+
+                - publish: "$(build.ArtifactStagingDirectory)"
+                  artifact: "Databricks"
+                  displayName: "Publish Databricks Artifact"
