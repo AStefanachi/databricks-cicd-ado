@@ -1,3 +1,4 @@
+# Build Pipeline for Azure DevOps
 parameters:
   - name: stageName
     type: string
@@ -14,27 +15,32 @@ stages:
           runOnce:
             deploy:
               steps:
+                # First we install the required libraries: databricks-cli and nutter
                 - script: pip install databricks-cli nutter
                   displayName: "Install python libraries"
 
+                # My preferred authentication approach: create the token file
                 - script: echo $(databricksToken) > token-file
                   displayName: "Create token file"
 
+                # Authenticate databricks-cli via token file
                 - script: databricks configure --host $(databricksHost) --token-file token-file
                   displayName: "Configure databricks-cli"
 
+                # Remove the token file from the Azure DevOps agent
                 - script: rm token-file
                   displayName: "Remove token file"
 
-                  # Download the files from the designated branch in the Git remote repository
-                  # onto the build agent.
+                # Download the files from the designated branch in the Git remote repository onto the build agent.
                 - checkout: self
                   persistCredentials: true
                   clean: true
 
+                # Import the notebooks in a temporary folder in our Databricks workspace
                 - script: databricks workspace import_dir -o $(Build.Repository.LocalPath) /tmp_nutter_test
                   displayName: "Import notebooks in the workspace for testing purposes"
 
+                # Run the tests contained in the folder /tmp_nutter_test
                 - script: |
                     nutter run /tmp_nutter_test/* $CLUSTER --junit_report --recursive
                   displayName: "Execute nutter tests"
@@ -43,6 +49,7 @@ stages:
                     DATABRICKS_HOST: $(databricksHost)
                     DATABRICKS_TOKEN: $(databricksToken)
 
+                # Publish the tests results to the Azure Runs component of Azure DevOps
                 - task: PublishTestResults@2
                   inputs:
                     testResultsFormat: "JUnit"
@@ -50,12 +57,15 @@ stages:
                     testRunTitle: "Publish Test results - databricks-cicd-ado"
                   condition: succeededOrFailed()
 
+                # Delete the temporary test folder in our Databricks workspace
                 - script: databricks workspace delete -r /tmp_nutter_test
                   displayName: "Delete /tmp_nutter_test in the workspace"
 
+                # Copy our notebooks from the local directory of the agent to the ArtifactStagingDirectory path
                 - script: "cp -r $(Build.Repository.LocalPath) $(Build.ArtifactStagingDirectory)"
-                  displayName: "Copy workspace-control to Artifact Staging Directory"
+                  displayName: "Copy notebooks to Artifact Staging Directory"
 
+                # Publish the build artifacts. The new artifact will be named dbr-cicd-ado
                 - publish: "$(build.ArtifactStagingDirectory)"
                   artifact: "dbr-cicd-ado"
                   displayName: "Publish Databricks Artifact"
