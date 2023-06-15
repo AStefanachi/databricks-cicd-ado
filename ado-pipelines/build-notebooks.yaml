@@ -41,6 +41,7 @@ stages:
                   displayName: "Import notebooks in the workspace for testing purposes"
 
                 # Run the tests contained in the folder /tmp_nutter_test
+                # IMPORTANT NOTE: if the test fails, the build pipeline will fail so the next steps will not be executed
                 - script: |
                     nutter run /tmp_nutter_test/* $CLUSTER --junit_report --recursive
                   displayName: "Execute nutter tests"
