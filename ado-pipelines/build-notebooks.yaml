@@ -1,3 +1,6 @@
+# Disable pipeline triggers
+trigger: none
+
 # Build Pipeline for Azure DevOps
 parameters:
   - name: stageName
