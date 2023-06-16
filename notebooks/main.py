@@ -14,3 +14,4 @@ spark.sql("CREATE SCHEMA IF NOT EXISTS covid")
 # COMMAND ----------
 # DBTITLE 1,Write data frame into a delta table
 sdf.write.mode("overwrite").saveAsTable("covid.covid_data")
+# added a comment to test cicd
