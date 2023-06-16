@@ -63,7 +63,7 @@ stages:
                   displayName: "Delete /tmp_nutter_test in the workspace"
 
                 # Copy our notebooks from the local directory of the agent to the ArtifactStagingDirectory path
-                - script: "cp -r $(Build.Repository.LocalPath) $(Build.ArtifactStagingDirectory)"
+                - script: "cp -r $(Build.Repository.LocalPath) $(Build.ArtifactStagingDirectory) --exclude $(Build.Repository.LocalPath)/ado-pipelines"
                   displayName: "Copy notebooks to Artifact Staging Directory"
 
                 # Publish the build artifacts. The new artifact will be named dbr-cicd-ado
