@@ -1,3 +1,6 @@
+# Disable pipeline triggers
+trigger: none
+
 # Build Pipeline for Azure DevOps
 parameters:
   - name: stageName
@@ -37,13 +40,13 @@ stages:
                   clean: true
 
                 # Import the notebooks in a temporary folder in our Databricks workspace
-                - script: databricks workspace import_dir -o $(Build.Repository.LocalPath) /tmp_nutter_test
+                - script: databricks workspace import_dir -o $(Build.Repository.LocalPath)/notebooks /tmp_nutter_test
                   displayName: "Import notebooks in the workspace for testing purposes"
 
                 # Run the tests contained in the folder /tmp_nutter_test
                 # IMPORTANT NOTE: if the test fails, the build pipeline will fail so the next steps will not be executed
                 - script: |
-                    nutter run /tmp_nutter_test/* $CLUSTER --junit_report --recursive
+                    nutter run /tmp_nutter_test/* $CLUSTER --junit_report --recursive --timeout 300
                   displayName: "Execute nutter tests"
                   env:
                     CLUSTER: $(databricksCluster)
@@ -63,7 +66,7 @@ stages:
                   displayName: "Delete /tmp_nutter_test in the workspace"
 
                 # Copy our notebooks from the local directory of the agent to the ArtifactStagingDirectory path
-                - script: "cp -r $(Build.Repository.LocalPath) $(Build.ArtifactStagingDirectory)"
+                - script: "cp -r $(Build.Repository.LocalPath)/notebooks $(Build.ArtifactStagingDirectory)/notebooks"
                   displayName: "Copy notebooks to Artifact Staging Directory"
 
                 # Publish the build artifacts. The new artifact will be named dbr-cicd-ado
