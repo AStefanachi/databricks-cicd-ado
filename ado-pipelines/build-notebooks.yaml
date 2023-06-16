@@ -37,7 +37,7 @@ stages:
                   clean: true
 
                 # Import the notebooks in a temporary folder in our Databricks workspace
-                - script: databricks workspace import_dir -o $(Build.Repository.LocalPath) /tmp_nutter_test
+                - script: databricks workspace import_dir -o $(Build.Repository.LocalPath)/notebooks /tmp_nutter_test
                   displayName: "Import notebooks in the workspace for testing purposes"
 
                 # Run the tests contained in the folder /tmp_nutter_test
@@ -63,7 +63,7 @@ stages:
                   displayName: "Delete /tmp_nutter_test in the workspace"
 
                 # Copy our notebooks from the local directory of the agent to the ArtifactStagingDirectory path
-                - script: "cp -r $(Build.Repository.LocalPath) $(Build.ArtifactStagingDirectory) --exclude $(Build.Repository.LocalPath)/ado-pipelines"
+                - script: "cp -r $(Build.Repository.LocalPath)/notebooks $(Build.ArtifactStagingDirectory)/notebooks"
                   displayName: "Copy notebooks to Artifact Staging Directory"
 
                 # Publish the build artifacts. The new artifact will be named dbr-cicd-ado
